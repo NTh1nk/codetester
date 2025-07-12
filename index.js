@@ -13,6 +13,13 @@ export default (app) => {
     return context.octokit.issues.createComment(issueComment);
   });
 
+  app.on("pull_request.opened", async (context) => {
+    const issueComment = context.issue({
+      body: "Thanks for opening this pull request!",
+    });
+    return context.octokit.issues.createComment(issueComment);
+  });
+
   // For more information on building apps:
   // https://probot.github.io/docs/
 
