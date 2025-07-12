@@ -1,6 +1,6 @@
-# codetester
+# codetester-2
 
-> A GitHub App built with [Probot](https://github.com/probot/probot) that a github app that tests your code for you
+> A GitHub App built with [Probot](https://github.com/probot/probot) that a code tester app
 
 ## Setup
 
@@ -16,15 +16,15 @@ npm start
 
 ```sh
 # 1. Build container
-docker build -t codetester .
+docker build -t codetester-2 .
 
 # 2. Start container
-docker run -e APP_ID=<app-id> -e PRIVATE_KEY=<pem-value> codetester
+docker run -e APP_ID=<app-id> -e PRIVATE_KEY=<pem-value> codetester-2
 ```
 
 ## Contributing
 
-If you have suggestions for how codetester could be improved, or want to report a bug, open an issue! We'd love all and any contributions.
+If you have suggestions for how codetester-2 could be improved, or want to report a bug, open an issue! We'd love all and any contributions.
 
 For more, check out the [Contributing Guide](CONTRIBUTING.md).
 

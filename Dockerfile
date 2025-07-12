@@ -1,15 +1,8 @@
-FROM node:20-slim AS builder
+FROM node:20-slim
 WORKDIR /usr/src/app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-FROM node:20-slim AS production
-WORKDIR /usr/src/app
-COPY package*.json ./
+COPY package.json package-lock.json ./
 RUN npm ci --production
-COPY --from=builder /usr/src/app/lib ./lib
-ENV NODE_ENV=production
-EXPOSE 3000
+RUN npm cache clean --force
+ENV NODE_ENV="production"
+COPY . .
 CMD [ "npm", "start" ]

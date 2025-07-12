@@ -1,8 +1,8 @@
 {
-  "name": "codetester",
+  "name": "codetester-2",
   "version": "1.0.0",
   "private": true,
-  "description": "a github app that tests your code for you",
+  "description": "a code tester app",
   "author": "NTh1nk",
   "license": "ISC",
   "homepage": "https://github.com//",
@@ -12,22 +12,15 @@
     "probot-app"
   ],
   "scripts": {
-    "build": "tsc",
-    "start": "tsc && probot run ./lib/index.js",
-    "test": "vitest"
+    "start": "probot run ./index.js",
+    "test": "node --test"
   },
   "dependencies": {
-    "probot": "^13.4.5"
+    "probot": "^13.0.1"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "nock": "^14.0.5",
-    "smee-client": "^2.0.0",
-    "vitest": "^2.0.0",
-    "typescript": "^5.8.3"
-  },
-  "overrides": {
-    "@types/pg": "8.15.1"
+    "nock": "^14.0.0-beta.5",
+    "smee-client": "^2.0.0"
   },
   "engines": {
     "node": ">= 18"

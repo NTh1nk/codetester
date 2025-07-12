@@ -1,18 +1,16 @@
-// You can import your modules
-// import index from '../src/index'
-
 import nock from "nock";
 // Requiring our app implementation
-import myProbotApp from "../src/index.js";
+import myProbotApp from "../index.js";
 import { Probot, ProbotOctokit } from "probot";
 // Requiring our fixtures
-//import payload from "./fixtures/issues.opened.json" with { "type": "json"};
+//import payload from "./fixtures/issues.opened.json" with { type: "json" };
+const issueCreatedBody = { body: "Thanks for opening this issue!" };
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { describe, beforeEach, afterEach, test, expect } from "vitest";
 
-const issueCreatedBody = { body: "Thanks for opening this issue!" };
+import { describe, beforeEach, afterEach, test } from "node:test";
+import assert from "node:assert";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -26,7 +24,7 @@ const payload = JSON.parse(
 );
 
 describe("My Probot app", () => {
-  let probot: any;
+  let probot;
 
   beforeEach(() => {
     nock.disableNetConnect();
@@ -55,8 +53,8 @@ describe("My Probot app", () => {
       })
 
       // Test that a comment is posted
-      .post("/repos/hiimbex/testing-things/issues/1/comments", (body: any) => {
-        expect(body).toMatchObject(issueCreatedBody);
+      .post("/repos/hiimbex/testing-things/issues/1/comments", (body) => {
+        assert.deepEqual(body, issueCreatedBody);
         return true;
       })
       .reply(200);
@@ -64,7 +62,7 @@ describe("My Probot app", () => {
     // Receive a webhook event
     await probot.receive({ name: "issues", payload });
 
-    expect(mock.pendingMocks()).toStrictEqual([]);
+    assert.deepStrictEqual(mock.pendingMocks(), []);
   });
 
   afterEach(() => {
@@ -75,9 +73,6 @@ describe("My Probot app", () => {
 
 // For more information about testing with Jest see:
 // https://facebook.github.io/jest/
-
-// For more information about using TypeScript in your tests, Jest recommends:
-// https://github.com/kulshekhar/ts-jest
 
 // For more information about testing with Nock see:
 // https://github.com/nock/nock
