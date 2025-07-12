@@ -7,6 +7,7 @@ export default (app) => {
 	app.log.info("Yay, the app was loaded!");
 
 	app.on("issues.opened", async (context) => {
+		app.log.info("Issue opened", context);
 		const issueComment = context.issue({
 			body: "Thanks for opening this issue!",
 		});
@@ -14,7 +15,7 @@ export default (app) => {
 	});
 
 	app.on("pull_request.opened", async (context) => {
-		app.log.info("Pull request opened", context.payload);
+		app.log.info("Pull request opened", context);
 		const issueComment = context.issue({
 			body: "Thanks for opening this pull request!",
 		});
