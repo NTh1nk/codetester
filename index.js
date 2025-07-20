@@ -141,6 +141,8 @@ export default (app, { getRouter }) => {
 			}
 		} catch (error) {
 			console.log("Failed to send analysis request:", error.message);
+			// Set a default browser flow if analysis fails
+			browserFlow = "Default browser flow: Navigate to the application and perform basic functionality testing.";
 		}
 
 		console.log(
@@ -196,6 +198,9 @@ export default (app, { getRouter }) => {
 							// Send POST request to QA test endpoint
 							try {
 								console.log("Sending QA test request...");
+								console.log("browserFlow:", browserFlow);
+								console.log("previewUrl:", previewUrl);
+								
 								const qaTestResponse = await fetch(
 									"http://localhost:4000/qa-test",
 									{
@@ -205,7 +210,7 @@ export default (app, { getRouter }) => {
 										},
 										body: JSON.stringify({
 											url: previewUrl,
-											promptContent: browserFlow,
+											promptContent: browserFlow || "No browser flow available",
 										}),
 									}
 								);
@@ -232,6 +237,13 @@ export default (app, { getRouter }) => {
 										"Failed to send QA test request:",
 										qaTestResponse.status
 									);
+									// Try to get the error response body
+									try {
+										const errorBody = await qaTestResponse.text();
+										console.log("Error response body:", errorBody);
+									} catch (e) {
+										console.log("Could not read error response body");
+									}
 								}
 							} catch (error) {
 								console.log("Error sending QA test request:", error.message);
