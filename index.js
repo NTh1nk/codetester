@@ -23,6 +23,9 @@ export default (app, { getRouter }) => {
 			return res.send("No context found");
 		}
 		console.log(lastCommentId);
+		console.log();
+		console.log("Attempting to update comment via API call...");
+		console.log("Comment content:", commentString);
 		const comment = await lastContext.octokit.issues.updateComment(
 			lastContext.issue({
 				body: commentString,
@@ -46,6 +49,10 @@ export default (app, { getRouter }) => {
 		const issueComment = context.issue({
 			body: "Thanks for opening this issue!",
 		});
+		console.log(
+			"Attempting to create initial comment for opened issue...",
+			issueComment
+		);
 		const comment = await context.octokit.issues.createComment(issueComment);
 		lastCommentId = comment.data.id;
 		console.log("lastCommentId", lastCommentId);
@@ -63,6 +70,9 @@ export default (app, { getRouter }) => {
 		const initialComment = context.issue({
 			body: "Thanks for opening this pull request! I'm analyzing your PR and will provide a detailed report shortly.",
 		});
+		console.log(
+			"Attempting to create initial comment for opened pull request..."
+		);
 		const comment = await context.octokit.issues.createComment(initialComment);
 		lastCommentId = comment.data.id;
 		console.log("lastCommentId", lastCommentId);
@@ -129,6 +139,8 @@ export default (app, { getRouter }) => {
 					"\n\n" +
 					"</details>";
 
+				console.log("Attempting to update comment with analysis results...");
+				console.log("Comment content:", commentBody);
 				await context.octokit.issues.updateComment(
 					context.issue({
 						body: commentBody,
@@ -142,7 +154,8 @@ export default (app, { getRouter }) => {
 		} catch (error) {
 			console.log("Failed to send analysis request:", error.message);
 			// Set a default browser flow if analysis fails
-			browserFlow = "Default browser flow: Navigate to the application and perform basic functionality testing.";
+			browserFlow =
+				"Default browser flow: Navigate to the application and perform basic functionality testing.";
 		}
 
 		console.log(
@@ -200,7 +213,7 @@ export default (app, { getRouter }) => {
 								console.log("Sending QA test request...");
 								console.log("browserFlow:", browserFlow);
 								console.log("previewUrl:", previewUrl);
-								
+
 								const qaTestResponse = await fetch(
 									"http://localhost:4000/qa-test",
 									{
@@ -223,6 +236,15 @@ export default (app, { getRouter }) => {
 
 									const resultComment = qaResult.githubComment;
 									// update the comment
+									console.log(
+										"Attempting to update comment with QA test results..."
+									);
+									console.log(
+										"Comment content:",
+										resultComment +
+											"\n\n" +
+											"[Show in Dashboard](http://localhost:7777)"
+									);
 									await context.octokit.issues.updateComment(
 										context.issue({
 											body:
