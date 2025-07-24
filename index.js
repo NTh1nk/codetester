@@ -243,14 +243,14 @@ export default (app, { getRouter }) => {
 										"Comment content:",
 										resultComment +
 											"\n\n" +
-											"[Show in Dashboard](http://localhost:7777)"
+											"[Show in Dashboard](http://20.84.58.132:7777/)"
 									);
 									await context.octokit.issues.updateComment(
 										context.issue({
 											body:
 												resultComment +
 												"\n\n" +
-												"[Show in Dashboard](http://localhost:7777)",
+												"[Show in Dashboard](http://20.84.58.132:7777/)",
 											comment_id: lastCommentId,
 										})
 									);
