@@ -1,4 +1,6 @@
 import express from "express";
+import { v5 as uuidv5 } from "uuid";
+import crypto from "crypto";
 
 /**
  * This is the main entrypoint to your Probot app
@@ -15,6 +17,18 @@ export default (app, { getRouter }) => {
 
 	let lastContext = null;
 	let lastCommentId = null;
+
+	// Function to generate UUID based on repo owner and name
+	function generateRepoUUID(owner, repoName) {
+		// Create a namespace UUID for this application
+		const NAMESPACE = uuidv5('https://github.com', uuidv5.URL);
+		
+		// Create a deterministic string from owner and repo name
+		const repoString = `${owner}/${repoName}`;
+		
+		// Generate UUID v5 based on the repo string
+		return uuidv5(repoString, NAMESPACE);
+	}
 
 	// Simple route that comments on a pull request
 	router.get("/comment", async (req, res) => {
@@ -42,6 +56,12 @@ export default (app, { getRouter }) => {
 		lastContext = context;
 		app.log.info(context);
 
+		// Generate UUID for this repository
+		const repoOwner = context.payload.repository.owner.login;
+		const repoName = context.payload.repository.name;
+		const repoUUID = generateRepoUUID(repoOwner, repoName);
+		console.log(`Repository UUID for ${repoOwner}/${repoName}: ${repoUUID}`);
+
 		// Get the issue URL
 		const issueUrl = context.payload.issue.html_url;
 		console.log("Issue URL: " + issueUrl);
@@ -62,6 +82,12 @@ export default (app, { getRouter }) => {
 	app.on("pull_request.opened", async (context) => {
 		lastContext = context;
 		app.log.info("Pull request opened:", context.payload.pull_request.html_url);
+
+		// Generate UUID for this repository
+		const repoOwner = context.payload.repository.owner.login;
+		const repoName = context.payload.repository.name;
+		const repoUUID = generateRepoUUID(repoOwner, repoName);
+		console.log(`Repository UUID for ${repoOwner}/${repoName}: ${repoUUID}`);
 
 		// Variable to store browser flow for later use
 		let browserFlow = "";
@@ -110,6 +136,9 @@ export default (app, { getRouter }) => {
 			pr_title: prTitle,
 			pr_description: prDescription,
 			repo_readme: readmeText,
+			repo_uuid: repoUUID,
+			repo_owner: repoOwner,
+			repo_name: repoName,
 		});
 
 		try {
@@ -224,6 +253,9 @@ export default (app, { getRouter }) => {
 										body: JSON.stringify({
 											url: previewUrl,
 											promptContent: browserFlow || "No browser flow available",
+											repo_uuid: repoUUID,
+											repo_owner: repoOwner,
+											repo_name: repoName,
 										}),
 									}
 								);
@@ -250,7 +282,7 @@ export default (app, { getRouter }) => {
 											body:
 												resultComment +
 												"\n\n" +
-												"[Show in Dashboard](http://20.84.58.132:7777/)",
+												`[Show in Dashboard](http://20.84.58.132:7777/${repoUUID})`,
 											comment_id: lastCommentId,
 										})
 									);
