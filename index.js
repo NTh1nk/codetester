@@ -253,7 +253,7 @@ export default (app, { getRouter }) => {
 										body: JSON.stringify({
 											url: previewUrl,
 											promptContent: browserFlow || "No browser flow available",
-											repo_uuid: repoUUID,
+											repositoryUuid: repoUUID,
 											repo_owner: repoOwner,
 											repo_name: repoName,
 										}),
