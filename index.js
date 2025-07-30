@@ -242,6 +242,12 @@ export default (app, { getRouter }) => {
 								console.log("Sending QA test request...");
 								console.log("browserFlow:", browserFlow);
 								console.log("previewUrl:", previewUrl);
+								console.log("repositoryUuid:", repoUUID);
+
+								// Validate that we have a valid repositoryUuid
+								if (!repoUUID) {
+									throw new Error("Repository UUID is not available");
+								}
 
 								const qaTestResponse = await fetch(
 									"http://localhost:4000/qa-test",
@@ -292,15 +298,74 @@ export default (app, { getRouter }) => {
 										qaTestResponse.status
 									);
 									// Try to get the error response body
+									let errorBody = "Unknown error";
 									try {
-										const errorBody = await qaTestResponse.text();
+										errorBody = await qaTestResponse.text();
 										console.log("Error response body:", errorBody);
 									} catch (e) {
 										console.log("Could not read error response body");
 									}
+
+									// Update comment with error information but still provide useful info
+									const errorComment = `## 🚀 Vercel Deployment Ready!
+
+Your application has been successfully deployed to Vercel!
+
+**Preview URL:** ${previewUrl}
+
+## ⚠️ QA Testing Status
+
+Unfortunately, the automated QA testing failed with the following error:
+\`\`\`
+${errorBody}
+\`\`\`
+
+**Repository UUID:** ${repoUUID}
+
+You can still manually test your application using the preview URL above.
+
+${browserFlow ? `**Browser Flow:**\n${browserFlow}` : ''}
+
+[Show in Dashboard](http://20.84.58.132:7777/${repoUUID})`;
+
+									await context.octokit.issues.updateComment(
+										context.issue({
+											body: errorComment,
+											comment_id: lastCommentId,
+										})
+									);
 								}
 							} catch (error) {
 								console.log("Error sending QA test request:", error.message);
+								
+								// Update comment with error information but still provide useful info
+								const errorComment = `## 🚀 Vercel Deployment Ready!
+
+Your application has been successfully deployed to Vercel!
+
+**Preview URL:** ${previewUrl}
+
+## ⚠️ QA Testing Status
+
+The automated QA testing encountered an error:
+\`\`\`
+${error.message}
+\`\`\`
+
+**Repository UUID:** ${repoUUID || 'Not available'}
+
+You can still manually test your application using the preview URL above.
+
+${browserFlow ? `**Browser Flow:**\n${browserFlow}` : ''}
+
+[Show in Dashboard](http://20.84.58.132:7777/${repoUUID || ''})`;
+
+								await context.octokit.issues.updateComment(
+									context.issue({
+										body: errorComment,
+										comment_id: lastCommentId,
+									})
+								);
 							}
 						} else {
 							console.log("No preview link found in comment");
