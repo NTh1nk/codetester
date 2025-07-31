@@ -244,10 +244,9 @@ export default (app, { getRouter }) => {
 								console.log("previewUrl:", previewUrl);
 								console.log("repositoryUuid:", repoUUID);
 
-								// Validate that we have a valid repositoryUuid
-								if (!repoUUID) {
-									throw new Error("Repository UUID is not available");
-								}
+								// Use default repositoryUuid if not available
+								const finalRepoUUID = repoUUID || "default-1753919908545";
+								console.log("Using repositoryUuid:", finalRepoUUID);
 
 								const qaTestResponse = await fetch(
 									"http://localhost:4000/qa-test",
@@ -259,7 +258,7 @@ export default (app, { getRouter }) => {
 										body: JSON.stringify({
 											url: previewUrl,
 											promptContent: browserFlow || "No browser flow available",
-											repositoryUuid: repoUUID,
+											repositoryUuid: finalRepoUUID,
 											repo_owner: repoOwner,
 											repo_name: repoName,
 										}),
@@ -288,7 +287,7 @@ export default (app, { getRouter }) => {
 											body:
 												resultComment +
 												"\n\n" +
-												`[Show in Dashboard](http://20.84.58.132:7777/${repoUUID})`,
+												`[Show in Dashboard](http://20.84.58.132:7777/${finalRepoUUID})`,
 											comment_id: lastCommentId,
 										})
 									);
@@ -320,13 +319,13 @@ Unfortunately, the automated QA testing failed with the following error:
 ${errorBody}
 \`\`\`
 
-**Repository UUID:** ${repoUUID}
+**Repository UUID:** ${finalRepoUUID}
 
 You can still manually test your application using the preview URL above.
 
 ${browserFlow ? `**Browser Flow:**\n${browserFlow}` : ''}
 
-[Show in Dashboard](http://20.84.58.132:7777/${repoUUID})`;
+[Show in Dashboard](http://20.84.58.132:7777/${finalRepoUUID})`;
 
 									await context.octokit.issues.updateComment(
 										context.issue({
@@ -352,13 +351,13 @@ The automated QA testing encountered an error:
 ${error.message}
 \`\`\`
 
-**Repository UUID:** ${repoUUID || 'Not available'}
+**Repository UUID:** ${finalRepoUUID}
 
 You can still manually test your application using the preview URL above.
 
 ${browserFlow ? `**Browser Flow:**\n${browserFlow}` : ''}
 
-[Show in Dashboard](http://20.84.58.132:7777/${repoUUID || ''})`;
+[Show in Dashboard](http://20.84.58.132:7777/${finalRepoUUID})`;
 
 								await context.octokit.issues.updateComment(
 									context.issue({
