@@ -20,14 +20,21 @@ export default (app, { getRouter }) => {
 
 	// Function to generate UUID based on repo owner and name
 	function generateRepoUUID(owner, repoName) {
-		// Create a namespace UUID for this application
-		const NAMESPACE = uuidv5('https://github.com', uuidv5.URL);
-		
-		// Create a deterministic string from owner and repo name
-		const repoString = `${owner}/${repoName}`;
-		
-		// Generate UUID v5 based on the repo string
-		return uuidv5(repoString, NAMESPACE);
+		try {
+			// Create a namespace UUID for this application
+			const NAMESPACE = uuidv5('https://github.com', uuidv5.URL);
+			
+			// Create a deterministic string from owner and repo name
+			const repoString = `${owner}/${repoName}`;
+			
+			// Generate UUID v5 based on the repo string
+			return uuidv5(repoString, NAMESPACE);
+		} catch (error) {
+			console.error("Failed to generate UUID:", error);
+			// Generate a fallback UUID based on timestamp and random data
+			const fallbackString = `${owner}/${repoName}/${Date.now()}`;
+			return uuidv5(fallbackString, uuidv5.URL);
+		}
 	}
 
 	// Simple route that comments on a pull request
@@ -244,10 +251,6 @@ export default (app, { getRouter }) => {
 								console.log("previewUrl:", previewUrl);
 								console.log("repositoryUuid:", repoUUID);
 
-								// Use default repositoryUuid if not available
-								const finalRepoUUID = repoUUID || "default-1753919908545";
-								console.log("Using repositoryUuid:", finalRepoUUID);
-
 								const qaTestResponse = await fetch(
 									"http://localhost:4000/qa-test",
 									{
@@ -258,7 +261,7 @@ export default (app, { getRouter }) => {
 										body: JSON.stringify({
 											url: previewUrl,
 											promptContent: browserFlow || "No browser flow available",
-											repositoryUuid: finalRepoUUID,
+											repositoryUuid: repoUUID,
 											repo_owner: repoOwner,
 											repo_name: repoName,
 										}),
@@ -280,14 +283,14 @@ export default (app, { getRouter }) => {
 										"Comment content:",
 										resultComment +
 											"\n\n" +
-											"[Show in Dashboard](http://20.84.58.132:7777/)"
+											`[Show in Dashboard](http://20.84.58.132:7777/${repoUUID})`
 									);
 									await context.octokit.issues.updateComment(
 										context.issue({
 											body:
 												resultComment +
 												"\n\n" +
-												`[Show in Dashboard](http://20.84.58.132:7777/${finalRepoUUID})`,
+												`[Show in Dashboard](http://20.84.58.132:7777/${repoUUID})`,
 											comment_id: lastCommentId,
 										})
 									);
@@ -319,13 +322,13 @@ Unfortunately, the automated QA testing failed with the following error:
 ${errorBody}
 \`\`\`
 
-**Repository UUID:** ${finalRepoUUID}
+**Repository UUID:** ${repoUUID}
 
 You can still manually test your application using the preview URL above.
 
 ${browserFlow ? `**Browser Flow:**\n${browserFlow}` : ''}
 
-[Show in Dashboard](http://20.84.58.132:7777/${finalRepoUUID})`;
+[Show in Dashboard](http://20.84.58.132:7777/${repoUUID})`;
 
 									await context.octokit.issues.updateComment(
 										context.issue({
@@ -351,13 +354,13 @@ The automated QA testing encountered an error:
 ${error.message}
 \`\`\`
 
-**Repository UUID:** ${finalRepoUUID}
+**Repository UUID:** ${repoUUID}
 
 You can still manually test your application using the preview URL above.
 
 ${browserFlow ? `**Browser Flow:**\n${browserFlow}` : ''}
 
-[Show in Dashboard](http://20.84.58.132:7777/${finalRepoUUID})`;
+[Show in Dashboard](http://20.84.58.132:7777/${repoUUID})`;
 
 								await context.octokit.issues.updateComment(
 									context.issue({
