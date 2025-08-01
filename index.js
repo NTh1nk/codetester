@@ -283,14 +283,14 @@ export default (app, { getRouter }) => {
 										"Comment content:",
 										resultComment +
 											"\n\n" +
-											`[Show in Dashboard](http://20.84.58.132:7777/${repoUUID})`
+											`[Show in Dashboard](http://20.84.58.132:7777/${repoUUID}){:target="_blank"}`
 									);
 									await context.octokit.issues.updateComment(
 										context.issue({
 											body:
 												resultComment +
 												"\n\n" +
-												`[Show in Dashboard](http://20.84.58.132:7777/${repoUUID})`,
+												`[Show in Dashboard](http://20.84.58.132:7777/${repoUUID}){:target="_blank"}`,
 											comment_id: lastCommentId,
 										})
 									);
@@ -328,7 +328,7 @@ You can still manually test your application using the preview URL above.
 
 ${browserFlow ? `**Browser Flow:**\n${browserFlow}` : ''}
 
-[Show in Dashboard](http://20.84.58.132:7777/${repoUUID})`;
+[Show in Dashboard](http://20.84.58.132:7777/${repoUUID}){:target="_blank"}`;
 
 									await context.octokit.issues.updateComment(
 										context.issue({
@@ -360,7 +360,7 @@ You can still manually test your application using the preview URL above.
 
 ${browserFlow ? `**Browser Flow:**\n${browserFlow}` : ''}
 
-[Show in Dashboard](http://20.84.58.132:7777/${repoUUID})`;
+[Show in Dashboard](http://20.84.58.132:7777/${repoUUID}){:target="_blank"}`;
 
 								await context.octokit.issues.updateComment(
 									context.issue({
